@@ -8,16 +8,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.websocket.server.PathParam;
 
 import com.aurora.community.service.AlphaService;
+import com.aurora.community.util.CommunityUtil;
 import com.fasterxml.jackson.core.sym.Name;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -148,5 +152,42 @@ public class AlphaController {
         emp3.put("salary", 19000);
         list.add(emp3);
         return list;
+    }
+
+    // cookie demo
+    @RequestMapping(path="/cookie/set", method=RequestMethod.GET)
+    @ResponseBody
+    public String setCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie("code", CommunityUtil.generateUUID()); // one cookie one str,str
+        cookie.setPath("/community/alpha"); // set use cookie sites
+        cookie.setMaxAge(60 * 10); // set cookie longety in disk until die, 10mins
+         
+        // send cookie
+        response.addCookie(cookie);
+        return "set cookie";
+    }
+
+    @RequestMapping(path="/cookie/get", method=RequestMethod.GET)
+    @ResponseBody
+    public String getCookie(@CookieValue("code") String code) {
+        System.out.println(code);
+        return "get cookie";
+    }
+
+    // session demo
+    @RequestMapping(path="/session/set", method=RequestMethod.GET)
+    @ResponseBody
+    public String setSession(HttpSession session) {
+        session.setAttribute("id", 1);
+        session.setAttribute("name", "test");
+        return "set session";
+    }
+
+    @RequestMapping(path="/session/get", method=RequestMethod.GET)
+    @ResponseBody
+    public String getSession(HttpSession session) {
+        System.out.println(session.getAttribute("id"));
+        System.out.println(session.getAttribute("name"));
+        return "get session";
     }
 }

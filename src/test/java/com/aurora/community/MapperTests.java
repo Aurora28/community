@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.List;
 
 import com.aurora.community.dao.DiscussPostMapper;
+import com.aurora.community.dao.LoginTicketMapper;
 import com.aurora.community.dao.UserMapper;
 import com.aurora.community.entity.DiscussPost;
+import com.aurora.community.entity.LoginTicket;
 import com.aurora.community.entity.User;
 
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @ContextConfiguration(classes = CommunityApplication.class)
 public class MapperTests {
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -71,5 +75,25 @@ public class MapperTests {
         }
         int rows = discussPostMapper.selectDiscussPostsRows(149);
         System.out.println(rows);
+    }
+
+    @Test
+    public void testInsertLoginTicket() {
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(101);
+        loginTicket.setStatus(0);
+        loginTicket.setTicket("abc");
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + 1000 * 60 * 10));
+        loginTicketMapper.insertLoginTicket(loginTicket);
+    }
+
+    @Test 
+    public void testSelectLoginTicket() {
+        LoginTicket loginTicket = loginTicketMapper.selectByTicket("abc");
+        System.out.println(loginTicket);
+
+        loginTicketMapper.updateStatus("abc", 1);
+        loginTicket = loginTicketMapper.selectByTicket("abc");
+        System.out.println(loginTicket);
     }
 }
