@@ -11,6 +11,7 @@ import com.aurora.community.entity.LoginTicket;
 import com.aurora.community.entity.User;
 import com.aurora.community.util.CommunityConstant;
 import com.aurora.community.util.CommunityUtil;
+import com.aurora.community.util.HostHolder;
 import com.aurora.community.util.MailClient;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +31,8 @@ public class UserService implements CommunityConstant{
     private TemplateEngine templateEngine;
     @Autowired
     private LoginTicketMapper loginTicketMapper;
+    @Autowired
+    private HostHolder hostHolder;
 
     @Value("${community.path.domain}")
     private String domain;
@@ -151,5 +154,44 @@ public class UserService implements CommunityConstant{
 
     public void logout(String ticket) {
         loginTicketMapper.updateStatus(ticket, 1);
+    }
+
+    public LoginTicket findLoginTicket(String ticket) {
+        return loginTicketMapper.selectByTicket(ticket);
+    }
+
+    public int updateHeader(int userId, String headerUrl) {
+        return userMapper.updateHeader(userId, headerUrl);
+    }
+    
+    public int updatePassword(int userId, String password) {
+        User user = userMapper.selectById(userId);
+        password = CommunityUtil.md5(password + user.getSalt());
+        return userMapper.updatePassword(userId, password);
+    }
+
+    public Map<String, Object> setPassword(String password, String newPassword, String rePassword) {
+        Map<String, Object> map = new HashMap<>();
+        if (StringUtils.isBlank(password) || password == null) {
+            map.put("passwordMsg", "original password cannot be empty");
+            return map;
+        }
+        if (StringUtils.isBlank(newPassword) || newPassword == null) {
+            map.put("newPasswordMsg", "new password cannot be empty");
+            return map;
+        }
+        if (StringUtils.isBlank(rePassword) || rePassword == null) {
+            map.put("rePasswordMsg", "please re-input your new password");
+            return map;
+        }
+        if (newPassword.length() < 8) {
+            map.put("newPasswordMsg", "new password cannot be less than 8 characters");
+            return map;
+        }
+        if (!newPassword.equals(rePassword)) {
+            map.put("rePasswordMsg", "two times input passwords are not same");
+            return map;
+        }
+        return map;
     }
 }
